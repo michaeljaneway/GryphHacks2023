@@ -12,9 +12,4 @@ class DemoScene(Scene):
 
 if __name__ == '__main__':
     scene = DemoScene()
-    scene.render() # That's it!
-    
-    # Here is the extra step if you want to also open 
-    # the movie file in the default video player 
-    # (there is a little different syntax to open an image)
-    open_media_file(scene.renderer.file_writer.movie_file_path)
+    scene.render()
