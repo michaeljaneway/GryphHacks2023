@@ -1,5 +1,6 @@
 from manim import *
 from ProjectStructs import Note
+from random import randint
 
 # This is the class that generates an animation based on file input (audio and JSON)
 
@@ -72,6 +73,7 @@ class AnimationGenerator(Scene):
         noteLine = Line(noteP1, noteP2)
         noteLine.color = YELLOW
         
+        # noteP2.add_updater((lambda dot: dot.become(self.getUpdatedEndDot(noteP2, note.freqency))))
         noteLine.add_updater((lambda line: line.become(self.getUpdatedLine(noteP1, noteP2))))
         
         self.noteLines.append(noteLine)
@@ -85,28 +87,20 @@ class AnimationGenerator(Scene):
         
     # animates the objects
     def startPlaying(self):
-        # runs dynamically craeted code to animate the objects
-        exec(self.createPendulumCode())
+        directions = []
         
-    # creates the pendulum code and returns it -- this is dynamically created and run by an exec function
-    def createPendulumCode(self):
-        pendulumAnimationCode = "self.play("
+        # assigning the directions to be going to the center (negative x direction)
+        for dot in self.endPoints:
+            directions.append([-dot.get_center()[0], -dot.get_center()[1], 0])
+            
+        animations = []
         
-        # shifts endpoints (set of P1s)
-        for i in range(self.startLeft, self.endLeft):
-            pendulumAnimationCode += "self.endPoints["
-            pendulumAnimationCode += str(i)
-            pendulumAnimationCode += "].animate.shift(DOWN + LEFT),"
-        
-        for i in range(self.startRight, self.endRight):
-            pendulumAnimationCode += "self.endPoints["
-            pendulumAnimationCode += str(i)
-            pendulumAnimationCode += "].animate.shift(DOWN + RIGHT),"
-        
-        pendulumAnimationCode += " run_time=3)"
-                
-        return pendulumAnimationCode
-    
+        for dot, direction, note in zip(self.endPoints, directions, notes):
+            print(note.frequency)
+            animations.append(ApplyMethod(dot.shift, direction, run_time=note.frequency * 3))
+            
+        self.play(*animations)
+            
     # creates new line where dot1 is the endpoint (it is presumably getting changed in most cases)
     def getUpdatedLine(self, dot1, dot2):
         point1 = dot1.get_center()
@@ -117,13 +111,22 @@ class AnimationGenerator(Scene):
         
         return updatedLine
     
+    # updates the center of the end point and returns and updated position, given a certain frequency
+    def getUpdatedEndDot(self, endDot, frequency):
+        pointLocation = endDot.get_center()
+        
+        # noteP1 = Dot(point=UP * 3 + self.calcuateHorizontalDirection(side, length), radius=POINT_SIZE)
+        
+        print(pointLocation)
+    
 if __name__ == "__main__":
     # creating notes to test
     notes = []
     
     for i in range(6):
         # frequency right now is half of the note
-        noteToAdd = Note(i/2, i)
+        # key (to change later) and frequency are the most relevant
+        noteToAdd = Note("", randint(0, 127), i, 0, 0)
         notes.append(noteToAdd)
     
     scene = AnimationGenerator()
