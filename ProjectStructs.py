@@ -2,6 +2,7 @@ import json
 
 class Project:
     def __init__(self) -> None:
+        self.name:str = ""
         self.instruments = {}
     
     def load_from_json_file(filepath) -> None:
@@ -13,8 +14,10 @@ class Project:
 
 class Instrument:
     def __init__(self) -> None:
+        self.name:str = ""
         self.effects = {}
         self.notes = {}
+        self.instrument_path = ""
         
     def add_note():
         pass
@@ -24,7 +27,12 @@ class Instrument:
     
 
 class Effect:
-    pass
+    def __init__(self) -> None:
+        self.name:str = ""
+        self.effect_path = ""
 
 class Note:
-    pass
+    def __init__(self, frequency, key) -> None:
+        self.name:str = ""
+        self.frequency: float = frequency
+        self.key:int = key

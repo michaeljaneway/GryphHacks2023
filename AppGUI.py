@@ -12,13 +12,15 @@ class MainApplication(tk.Tk):
         # https://github.com/rdbende/Sun-Valley-ttk-theme
 
         # All of these previous lines of code are essentially setting up the frame and window, and how they dynamically resize
-
         self.frameleft = ttk.LabelFrame(
-            self, padding="20", width=200, height=200, text="Frame2")
+            self, padding="20", width=150, height=200, text="FrameLEFT")
         self.frameleft.grid(column=0, row=0, sticky=(
-            tk.N, tk.S), padx=25, pady=25)
+            tk.N, tk.S,tk.W), padx=15, pady=15)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        # p = ttk.Progressbar(self.frameleft, orient=tk.HORIZONTAL, length=200, mode='determinate')
+        # p.grid(column=0,row=1,sticky=(tk.W,tk.E),padx=20,pady=20)
+        # p.start()
 
         sv_ttk.use_dark_theme()
 
@@ -32,15 +34,22 @@ class MainApplication(tk.Tk):
         self.instrument_tree.insert('Instr1', 'end', text="Note 2")
         self.instrument_tree.insert('Instr1', 'end', text="Effect 1")
         self.instrument_tree.insert('Instr1', 'end', text="Effect 2")
+        
         self.instrument_tree.insert('', 'end', text='swag', tags=('swag'))
+        self.instrument_tree.tag_configure('swag', background='green')
+        self.instrument_tree.tag_bind('swag',"<1>", self.instrument_tree.focus())
 
         self.instrument_tree.bind(
             "<<TreeviewSelect>>", lambda event: self.tree_select())
+        
+        self.frameright = ttk.LabelFrame(self, padding="20", width=150, height=200, text="FrameRIGHT")
+        self.frameright.grid(column=2, row=0, sticky=(
+            tk.N, tk.S,tk.E), padx=15, pady=15)
 
         funny_button = ttk.Button(
             self.frameleft, text="Open Image", command=lambda: self.instrument_tree.grid_forget())
         funny_button.grid(column=0, row=0, sticky=(
-            tk.N, tk.W, tk.E, tk.S), padx=50, pady=100.2)
+            tk.N, tk.W, tk.E, tk.S), padx=20, pady=20)
         open_editor_button = ttk.Button(
             self.frameleft, text="Open Editor"
         )
@@ -48,7 +57,7 @@ class MainApplication(tk.Tk):
         render_button = ttk.Button(
             self.frameleft, text="RENDER", command=lambda: self.render())
         render_button.grid(column=1, row=1, sticky=(
-            tk.E, tk.W), padx=50, pady=66.5)
+            tk.E, tk.W), padx=50, pady=66)
 
     def funny_function(self):
         print("Helloeggs")

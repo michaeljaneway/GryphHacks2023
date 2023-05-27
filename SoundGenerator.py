@@ -1,5 +1,17 @@
+import dawdreamer as daw
+import numpy as np
+import ProjectStructs
 
 
 class SoundGenerator:
-    def __init__(self) -> None:
-        pass
+    def generate_project(project: ProjectStructs.Project, output_path: str):
+        engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+        
+        
+        for instrument in project.instruments:
+            pass
+
+
+if __name__ == "__main__":
+    pass
