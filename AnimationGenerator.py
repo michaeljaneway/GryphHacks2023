@@ -6,6 +6,8 @@ from ProjectStructs import Note
 
 POINT_SIZE = 0.08
 NOTE_WIDTH = 5
+NOTE_WIDTH_MULTIPLIER = 2
+NOTE_CIRCLE_OFFSET = 2
 
 class AnimationGenerator(Scene):
     def construct(self):
@@ -26,7 +28,7 @@ class AnimationGenerator(Scene):
         self.anchorLine = Line(self.anchorPoints[0], self.anchorPoints[1])
         self.anchorLine.color = RED
         
-        self.topCircle = Circle().surround(anchorP1, buffer_factor=4)
+        self.topCircle = Circle().surround(anchorP1, buffer_factor=NOTE_WIDTH_MULTIPLIER * 2)
         self.topCircle.set_stroke(color=PINK)
         
         self.add(self.anchorLine)
@@ -62,16 +64,28 @@ class AnimationGenerator(Scene):
             
     # creates a new note line and note circle
     def createNote(self, note, length, side):
+        # adding note lines
         notePoints = VGroup()
-        noteP1 = Dot(point=UP * 3 + side * length, radius=POINT_SIZE)
+        noteP1 = Dot(point=UP * 3 + self.calcuateHorizontalDirection(side, length), radius=POINT_SIZE)
         noteP2 = Dot(point=UP * 3, radius=POINT_SIZE)
         
         notePoints.add(noteP1, noteP2)
         noteLine = Line(noteP1, noteP2)
         noteLine.color = YELLOW
         
-        self.add(noteLine)
+        # adding note circles
+        noteCircle = Circle().surround(noteP1, buffer_factor = NOTE_WIDTH_MULTIPLIER)
+        noteCircle.set_stroke(color=ORANGE)
+        
         self.noteLines.append(noteLine)
+        self.noteCircles.append(noteCircle)
+        
+        self.add(noteLine)
+        self.add(noteCircle)
+        
+    # calculates horizontal direction
+    def calcuateHorizontalDirection(self, side, length):
+        return (NOTE_CIRCLE_OFFSET + length) * side
         
     def startPlaying(self):
         for i in self.noteCircles:
