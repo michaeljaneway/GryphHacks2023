@@ -94,8 +94,6 @@ class MainApplication(tk.Tk):
             tk.E, tk.W), padx=10, pady=(50, 10))
 
     def create_frames(self):
-        # creating the left frame
-
         # creating the instrument tree on the right
         self.instrument_tree = ttk.Treeview(
             self, show="tree")
@@ -174,7 +172,7 @@ class MainApplication(tk.Tk):
             current_selection = self.instrument_tree.parent(current_selection)
 
         self.instrument_tree.insert(current_selection, 'end', text="♪ " + number_to_note(
-            int(self.spinval.get())), tags=["note", self.note_count])
+            int(self.spinval.get())), tags=["note", self.note_count + self.velocity_key + self.length_key])
         self.instrument_tree.tag_configure('note', background='green')
         self.note_count += 1
 
@@ -195,10 +193,11 @@ class MainApplication(tk.Tk):
         sel_id = self.instrument_tree.selection()[0]
 
         print(self.instrument_tree.item(sel_id))
+    def length_key(self):
+        self.keyselector.config(float(self.lengthval.get()))
 
-    def duration_key(self):
-        pass
-#        self.keyselector.config(float=)
+    def velocity_key(self):
+        self.keyselector.config(float(self.velocityval.get()))
 
     def show_key(self):
         self.keyselector_text.config(
