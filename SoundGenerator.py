@@ -56,11 +56,14 @@ if __name__ == "__main__":
     test_instrument = ProjectStructs.Instrument(
         "Surge", "assets\Surge XT.vst3")
     test_effect = ProjectStructs.Effect("SuperMassive", "assets\ValhallaSupermassive.vst3")
-    test_note1 = ProjectStructs.Note("Key 1", 30, 5, 60, 2)
+    test_note1 = ProjectStructs.Note("Key 1", 30, 5, 100, 3)
+    test_note2 = ProjectStructs.Note("Key 1", 20, 2.5, 100, 2)
 
     test_project.instruments.update({test_instrument.name: test_instrument})
     test_project.instruments[test_instrument.name].notes.update(
         {test_note1.name: test_note1})
+    test_project.instruments[test_instrument.name].notes.update(
+        {test_note2.name: test_note2})
     test_project.instruments[test_instrument.name].effects.update({test_effect.name: test_effect})
 
     SoundGenerator.generate_project(test_project, "eggs.wav")
