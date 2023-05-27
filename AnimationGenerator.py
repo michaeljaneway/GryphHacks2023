@@ -7,16 +7,10 @@ from ProjectStructs import Note
 POINT_SIZE = 0.08
 NOTE_WIDTH = 5
 
-"""
-Note about notes:
-Note will hold frequency, key (actual note being played)
-"""
-
 class AnimationGenerator(Scene):
     def construct(self):
-        tempNumNotes = 1 # to be removed once I start parsing a JSON file
         self.initStartingGraphics()
-        self.initNotes(tempNumNotes)
+        self.initNotes()
         self.startPlaying()
     
     # all graphics that are not notes
@@ -40,16 +34,45 @@ class AnimationGenerator(Scene):
         
     def addNotes(self, notes):
         self.notes = notes
+        self.numNotes = len(self.notes)
     
-    def initNotes(self, numNotes):
+    def initNotes(self):
+        self.noteLines = []
         self.noteCircles = []
         
-        for i in range(numNotes):
-            self.noteCircles.append(Circle())
-    
-            self.noteCircles[i].set_stroke(color=PINK, width=NOTE_WIDTH)
-            # self.add(self.noteCircles[i])
-    
+        # determining indices for which what goes on the left and what goes on the right
+        startLeft = 0
+        endLeft = int(self.numNotes/2)
+        startRight = endLeft
+        endRight = self.numNotes
+                
+        # iterates through each note that will be put on the left
+        notesOnSide = 0
+        
+        for i in range(startLeft, endLeft):
+            self.createNote(self.notes[i], notesOnSide + 1, LEFT)
+            notesOnSide += 1
+            
+        # puts rest of notes on the right
+        notesOnSide = 0
+        
+        for i in range(startRight, endRight):
+            self.createNote(self.notes[i], notesOnSide + 1, RIGHT)
+            notesOnSide += 1
+            
+    # creates a new note line and note circle
+    def createNote(self, note, length, side):
+        notePoints = VGroup()
+        noteP1 = Dot(point=UP * 3 + side * length, radius=POINT_SIZE)
+        noteP2 = Dot(point=UP * 3, radius=POINT_SIZE)
+        
+        notePoints.add(noteP1, noteP2)
+        noteLine = Line(noteP1, noteP2)
+        noteLine.color = YELLOW
+        
+        self.add(noteLine)
+        self.noteLines.append(noteLine)
+        
     def startPlaying(self):
         for i in self.noteCircles:
             pass
@@ -58,7 +81,7 @@ if __name__ == "__main__":
     # creating notes to test
     notes = []
     
-    for i in range(5):
+    for i in range(6):
         # frequency right now is half of the note
         noteToAdd = Note(i/2, i)
         notes.append(noteToAdd)
