@@ -2,3 +2,4 @@ Manim
 DawDreamer
 Tkinter
 sv-ttk
+https://gist.github.com/devxpy/063968e0a2ef9b6db0bd6af8079dad2a

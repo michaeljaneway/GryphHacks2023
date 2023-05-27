@@ -1,38 +1,58 @@
 import json
+from typing import *
+import dawdreamer as daw
+
+
+class Effect:
+    name = str
+    effect_path = str
+    save_state_path = str
+
+    def __init__(self) -> None:
+        pass
+
+
+class Note:
+    name = str
+    frequency = float
+    key = int
+    velocity = int
+    duration = float
+
+    def __init__(self, frequency, key) -> None:
+
+        self.frequency = frequency
+        self.key = key
+
+
+class Instrument:
+    name = str
+    instrument_path = str
+    save_state_path = str
+    
+    effects = {str: Effect}
+    notes = {str: Note}
+
+    def __init__(self) -> None:
+        pass
+
+    def add_note():
+        pass
+
+    def add_effect():
+        pass
+
 
 class Project:
+    name = str
+    instruments = {str: Instrument}
+    time_length = float
+
     def __init__(self) -> None:
-        self.name:str = ""
-        self.instruments = {}
-    
+        pass
+
     def load_from_json_file(filepath) -> None:
         pass
 
     def save_to_json_file(filepath) -> None:
         pass
-
-
-class Instrument:
-    def __init__(self) -> None:
-        self.name:str = ""
-        self.effects = {}
-        self.notes = {}
-        self.instrument_path = ""
-        
-    def add_note():
-        pass
-    
-    def add_effect():
-        pass
-    
-
-class Effect:
-    def __init__(self) -> None:
-        self.name:str = ""
-        self.effect_path = ""
-
-class Note:
-    def __init__(self, frequency, key) -> None:
-        self.name:str = ""
-        self.frequency: float = frequency
-        self.key:int = key
