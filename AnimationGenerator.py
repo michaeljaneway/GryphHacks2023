@@ -3,17 +3,10 @@ from ProjectStructs import Note
 
 # This is the class that generates an animation based on file input (audio and JSON)
 
-POINT_SIZE = 0.08
+POINT_SIZE = 0.2
 NOTE_WIDTH = 5
-NOTE_WIDTH_MULTIPLIER = 2
+NOTE_WIDTH_MULTIPLIER = 1
 NOTE_CIRCLE_OFFSET = 2
-
-"""
-Outline of solution to move objects.
-
-Use updater function in provided link -- have a lambda function that updates the line with the new update (does this every frame)
-Also add an updater function with a lambda for updating the endpoint (p1) on the circle. Updates it so that new circle still surrounds it.
-"""
 
 class AnimationGenerator(Scene):
     def construct(self):
@@ -33,9 +26,6 @@ class AnimationGenerator(Scene):
         
         self.anchorLine = Line(self.anchorPoints[0], self.anchorPoints[1])
         self.anchorLine.color = RED
-        
-        # self.anchorLine.add_updater()
-        # self.update_self()
                 
         self.topCircle = Circle().surround(anchorP1, buffer_factor=NOTE_WIDTH_MULTIPLIER * 2)
         self.topCircle.set_stroke(color=PINK)
@@ -49,7 +39,6 @@ class AnimationGenerator(Scene):
     
     def initNotes(self):
         self.noteLines = []
-        self.noteCircles = []
         self.endPoints = []
         
         # determining indices for which what goes on the left and what goes on the right
@@ -72,7 +61,7 @@ class AnimationGenerator(Scene):
             self.createNote(self.notes[i], notesOnSide + 1, RIGHT)
             notesOnSide += 1
             
-    # creates a new note line and note circle
+    # creates a new note line and note end point (p1)
     def createNote(self, note, length, side):
         # adding note lines
         notePoints = VGroup()
@@ -85,18 +74,10 @@ class AnimationGenerator(Scene):
         
         noteLine.add_updater((lambda line: line.become(self.getUpdatedLine(noteP1, noteP2))))
         
-        # adding note circles
-        noteCircle = Circle().surround(noteP1, buffer_factor = NOTE_WIDTH_MULTIPLIER)
-        noteCircle.set_stroke(color=ORANGE)
-        
-        # noteCircle.add_updater((lambda circle: circle.become(self.getUpdatedCircle(noteP1))))
-        
         self.noteLines.append(noteLine)
-        self.noteCircles.append(noteCircle)
         self.endPoints.append(noteP1)
         
         self.add(noteLine)
-        self.add(noteCircle)
         
     # calculates horizontal direction
     def calcuateHorizontalDirection(self, side, length):
@@ -135,16 +116,6 @@ class AnimationGenerator(Scene):
         updatedLine.color = YELLOW
         
         return updatedLine
-    
-    # creats a new circle and returns it, given the updated point (updated endpoint, which corresponds to P1)
-    def getUpdatedCircle(self, endDot):
-        endPoint = endDot.get_center()
-        
-        updatedCircle = Circle().surround(endDot, buffer_factor = NOTE_WIDTH_MULTIPLIER)
-        updatedCircle.set_stroke(color=ORANGE)
-        
-        return updatedCircle
-        
     
 if __name__ == "__main__":
     # creating notes to test
