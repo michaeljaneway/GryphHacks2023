@@ -60,7 +60,7 @@ class AnimationGenerator(Scene):
     
         # sort these notes by their keys (higher notes are supposed to me closer in and lower notes are supposed to be further out)
         # thus lower notes should be earlier in the array as they should be on the outside
-        notes.sort(key=self.sortByNoteKey)
+        notes.sort(key=self.sortByNoteKey, reverse=True)
         
         for i in range(len(self.notes)):
             # every other element goes on left or right side (sorted )
@@ -108,12 +108,23 @@ class AnimationGenerator(Scene):
         self.directionsThird = [] # goes toward center from the right
         self.directionsFourth = [] # goes toward the left from the center
         
+        i = 0
+        
         # assigning the directions to be going to the center (negative x direction)
-        for dot in self.endPoints:
-            self.directionsFirst.append([-dot.get_center()[0], -dot.get_center()[1], 0])
-            self.directionsSecond.append([-dot.get_center()[0], dot.get_center()[1], 0])
-            self.directionsThird.append([dot.get_center()[0], -dot.get_center()[1], 0])
-            self.directionsFourth.append([dot.get_center()[0], dot.get_center()[1], 0])
+        for i in range(len(self.endPoints)):
+            self.directionsFirst.append([-self.endPoints[i].get_center()[0], -self.endPoints[i].get_center()[1], 0])
+            self.directionsSecond.append([-self.endPoints[i].get_center()[0], self.endPoints[i].get_center()[1], 0])
+            self.directionsThird.append([self.endPoints[i].get_center()[0], -self.endPoints[i].get_center()[1], 0])
+            self.directionsFourth.append([self.endPoints[i].get_center()[0], self.endPoints[i].get_center()[1], 0])
+            
+            # adjusting to make endpoints go lower
+            self.directionsFirst[i] += DOWN * i/self.numNotes
+            self.directionsThird[i] += DOWN * i/self.numNotes
+            
+            self.directionsSecond[i] += UP * i/self.numNotes
+            self.directionsFourth[i] += UP * i/self.numNotes
+            
+            i += 1
             
         animations = []
         
@@ -168,10 +179,12 @@ if __name__ == "__main__":
     notes = []
     
     # note that this is going in reverse order (order of frequency doesn't matter)
-    for i in range(6, 0, -1):
+    for i in range(6):
         # frequency right now is half of the note
         # key (to change later) and frequency are the most relevant
-        noteToAdd = Note("", 10 - i, i + 2, 0, 0)
+        
+        noteToAdd = Note("", i + 1, 7 - i, 0, 0) # FIXME watch when going to zero
+        # frequency, key is printed
         notes.append(noteToAdd)
     
     scene = AnimationGenerator()
