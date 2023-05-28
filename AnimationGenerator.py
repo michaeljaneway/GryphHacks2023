@@ -13,7 +13,8 @@ class AnimationGenerator(Scene):
     def construct(self):
         self.initStartingGraphics()
         self.initNotes()
-        self.startPlaying()
+        # playing for 47 seconds for testing purposes
+        self.startPlaying(47)
     
     # all graphics that are not notes
     def initStartingGraphics(self):
@@ -73,7 +74,6 @@ class AnimationGenerator(Scene):
         noteLine = Line(noteP1, noteP2)
         noteLine.color = YELLOW
         
-        # noteP2.add_updater((lambda dot: dot.become(self.getUpdatedEndDot(noteP2, note.freqency))))
         noteLine.add_updater((lambda line: line.become(self.getUpdatedLine(noteP1, noteP2))))
         
         self.noteLines.append(noteLine)
@@ -86,19 +86,34 @@ class AnimationGenerator(Scene):
         return (NOTE_CIRCLE_OFFSET + length) * side
         
     # animates the objects
-    def startPlaying(self):
-        directions = []
+    def startPlaying(self, duration):
+        directionsFirst = [] # goes toward center from the left
+        directionsSecond  = [] # goes away from center to the right
+        directionsThird = [] # goes toward center from the right
+        directionsFourth = [] # goes toward the left from the center
         
         # assigning the directions to be going to the center (negative x direction)
         for dot in self.endPoints:
-            directions.append([-dot.get_center()[0], -dot.get_center()[1], 0])
+            directionsFirst.append([-dot.get_center()[0], -dot.get_center()[1], 0])
+            directionsSecond.append([-dot.get_center()[0], dot.get_center()[1], 0])
+            directionsThird.append([dot.get_center()[0], -dot.get_center()[1], 0])
+            directionsFourth.append([dot.get_center()[0], dot.get_center()[1], 0])
             
         animations = []
+        animationDuration = 0
+        fullAnimationTime = self.getTimeForFullAnimation() # corresponds to one full cycle of animation
+        timeLeft = duration
         
-        for dot, direction, note in zip(self.endPoints, directions, notes):
-            print(note.frequency)
-            animations.append(ApplyMethod(dot.shift, direction, run_time=note.frequency * 3))
+        # for loop to run animations
+        for i in range(len(self.endPoints)):
             
+            animations.append(Succession(ApplyMethod(self.endPoints[i].shift, directionsFirst[i], run_time=self.notes[i].frequency), 
+                                         ApplyMethod(self.endPoints[i].shift, directionsSecond[i], run_time=self.notes[i].frequency),
+                                         ApplyMethod(self.endPoints[i].shift, directionsThird[i], run_time=self.notes[i].frequency),
+                                         ApplyMethod(self.endPoints[i].shift, directionsFourth[i], run_time=self.notes[i].frequency)))
+            
+            animationDuration += self.notes[i].frequency
+
         self.play(*animations)
             
     # creates new line where dot1 is the endpoint (it is presumably getting changed in most cases)
@@ -110,14 +125,15 @@ class AnimationGenerator(Scene):
         updatedLine.color = YELLOW
         
         return updatedLine
-    
-    # updates the center of the end point and returns and updated position, given a certain frequency
-    def getUpdatedEndDot(self, endDot, frequency):
-        pointLocation = endDot.get_center()
         
-        # noteP1 = Dot(point=UP * 3 + self.calcuateHorizontalDirection(side, length), radius=POINT_SIZE)
+    # iterates through notes and counts up the frequency
+    def getTimeForFullAnimation(self):
+        fullAnimationTime = 0
         
-        print(pointLocation)
+        for note in self.notes:
+            fullAnimationTime += note.frequency
+            
+        return fullAnimationTime
     
 if __name__ == "__main__":
     # creating notes to test
@@ -126,7 +142,7 @@ if __name__ == "__main__":
     for i in range(6):
         # frequency right now is half of the note
         # key (to change later) and frequency are the most relevant
-        noteToAdd = Note("", randint(0, 127), i, 0, 0)
+        noteToAdd = Note("", randint(0, 127), i + 1, 0, 0)
         notes.append(noteToAdd)
     
     scene = AnimationGenerator()
