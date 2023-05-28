@@ -149,15 +149,19 @@ class AnimationGenerator(Scene):
             # initial view
             # move to right (if endpoint was initially on left), opposite otherwise
             if animationsAdded == 0:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency, rate_func=rate_functions.linear),)       
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], 0, rate_func=rate_functions.linear))       
             # move to right (if endpoint was initially on left), opposite otherwise
             elif animationsAdded % 2 == 1:
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
+                
+                animationDuration += self.notes[i].frequency
             # move to left (if endpoint was initially on left), opposite otherwise
             else:
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
+                
+                animationDuration += self.notes[i].frequency
      
             animationsAdded += 1
             

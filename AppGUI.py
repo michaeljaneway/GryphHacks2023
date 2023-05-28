@@ -94,9 +94,15 @@ class MainApplication(tk.Tk):
             tk.E, tk.W), padx=10, pady=10)
 
         # Render Button
-        self.render_button = ttk.Button(
-            self.left_menu_frame, text="Render", command=lambda: self.render())
-        self.render_button.grid(column=1, row=5, sticky=(
+        self.render_button_I = ttk.Button(
+            self.left_menu_frame, text="Render Isaiah", command=lambda: self.renderIsaiah())
+        self.render_button_I.grid(column=1, row=5, sticky=(
+            tk.E, tk.W), padx=10, pady=(50, 10))
+        
+        # Render Button
+        self.render_button_M = ttk.Button(
+            self.left_menu_frame, text="Render Michael", command=lambda: self.renderMichael())
+        self.render_button_M.grid(column=1, row=6, sticky=(
             tk.E, tk.W), padx=10, pady=(50, 10))
 
     # Creates the Project/Instrument/Note Tree on the right side of the screen
@@ -459,22 +465,37 @@ class MainApplication(tk.Tk):
 # Project Render
 # ==========================================================
 
-    def render(self):
+    def renderIsaiah(self):
         if not self.isTreeNodeSelected():
             return
 
         project_str = self.getValueTypeOfSelection("project")["name"]
 
-        SoundGenerator.generate_project(
-            self.projects[project_str], "eggs2.wav")
+        SoundGenerator.generate_project(self.projects[project_str], "eggs2.wav")
 
         # loading up other class to create a audio-visualizer
         scene = AnimationGenerator()
-        scene.load_project(self.projects[project_str], "eggs2.wav")
+        scene.load_project(self.projects[project_str])
         scene.add_sound("eggs2.wav")
         scene.render()
 
-        messagebox.showinfo(title="Render Complete",
+        messagebox.showinfo(title="Isaiah Render Complete",
+                            message="The render has been completed")
+        
+    def renderMichael(self):
+        if not self.isTreeNodeSelected():
+            return
+
+        project_str = self.getValueTypeOfSelection("project")["name"]
+
+        SoundGenerator.generate_project(self.projects[project_str], "eggs2.wav")
+
+        # loading up other class to create a audio-visualizer
+        scene = AnimRenderScene()
+        scene.load_project(self.projects[project_str], "eggs2.wav")
+        scene.render()
+
+        messagebox.showinfo(title="Michael Render Complete",
                             message="The render has been completed")
 
 
