@@ -17,10 +17,7 @@ class AnimationGenerator(Scene):
         self.startPlaying(47)
     
     # all graphics that are not notes
-    def initStartingGraphics(self):
-        self.plane = NumberPlane() # to remove
-        self.add(self.plane)        
-        
+    def initStartingGraphics(self):  
         self.anchorPoints = VGroup()
         anchorP1 = Dot(point=UP * 3, radius = POINT_SIZE)
         anchorP2 = Dot(point=DOWN * 3, radius = POINT_SIZE)
@@ -87,34 +84,77 @@ class AnimationGenerator(Scene):
         
     # animates the objects
     def startPlaying(self, duration):
-        directionsFirst = [] # goes toward center from the left
-        directionsSecond  = [] # goes away from center to the right
-        directionsThird = [] # goes toward center from the right
-        directionsFourth = [] # goes toward the left from the center
+        self.directionsFirst = [] # goes toward center from the left
+        self.directionsSecond  = [] # goes away from center to the right
+        self.directionsThird = [] # goes toward center from the right
+        self.directionsFourth = [] # goes toward the left from the center
         
         # assigning the directions to be going to the center (negative x direction)
         for dot in self.endPoints:
-            directionsFirst.append([-dot.get_center()[0], -dot.get_center()[1], 0])
-            directionsSecond.append([-dot.get_center()[0], dot.get_center()[1], 0])
-            directionsThird.append([dot.get_center()[0], -dot.get_center()[1], 0])
-            directionsFourth.append([dot.get_center()[0], dot.get_center()[1], 0])
+            self.directionsFirst.append([-dot.get_center()[0], -dot.get_center()[1], 0])
+            self.directionsSecond.append([-dot.get_center()[0], dot.get_center()[1], 0])
+            self.directionsThird.append([dot.get_center()[0], -dot.get_center()[1], 0])
+            self.directionsFourth.append([dot.get_center()[0], dot.get_center()[1], 0])
             
         animations = []
         animationDuration = 0
         fullAnimationTime = self.getTimeForFullAnimation() # corresponds to one full cycle of animation
-        timeLeft = duration
+        fullAnimations = duration // fullAnimationTime
+        self.timeLeft = duration - fullAnimationTime * fullAnimations
         
         # for loop to run animations
         for i in range(len(self.endPoints)):
+            # dynamically creating a succession of animations for each endpoint and appending them to animations array
+            animations.append(self.createAnimationsSuccession(i, fullAnimations))
             
-            animations.append(Succession(ApplyMethod(self.endPoints[i].shift, directionsFirst[i], run_time=self.notes[i].frequency), 
-                                         ApplyMethod(self.endPoints[i].shift, directionsSecond[i], run_time=self.notes[i].frequency),
-                                         ApplyMethod(self.endPoints[i].shift, directionsThird[i], run_time=self.notes[i].frequency),
-                                         ApplyMethod(self.endPoints[i].shift, directionsFourth[i], run_time=self.notes[i].frequency)))
-            
-            animationDuration += self.notes[i].frequency
+            animationDuration += self.notes[i].frequency # FIXME, will need to adjust with new implementation
 
         self.play(*animations)
+        
+    # creates code for a succession based on time left and full rotations calculated and returns it to be executed
+    def createAnimationsSuccession(self, i, fullAnimations): 
+        fullAnimationsCount = 0
+        movingToRight = True
+        
+        animationList = []
+        
+        # just for first animation
+        if fullAnimations > 0:
+            animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency))
+            movingToRight = False
+            fullAnimationsCount += 1
+            
+        dividedFrequency = run_time=self.notes[i].frequency / 2
+            
+        # now for rest of animations
+        while fullAnimationsCount < fullAnimations:
+            if fullAnimationsCount % 2 == 1:
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=dividedFrequency))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=dividedFrequency))
+                movingToRight = False
+            else:
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=dividedFrequency))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=dividedFrequency))
+                movingToRight = True
+                
+            fullAnimationsCount += 1
+            
+        # checking if partial rotations should be included based on time left in last animation cycle
+        if self.timeLeft > self.notes[i].frequency:
+            if movingToRight:
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=dividedFrequency))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=dividedFrequency))
+                movingToRight = False
+            else:
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=dividedFrequency))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=dividedFrequency))
+                movingToRight = True
+                
+            self.timeLeft -= self.notes[i].frequency
+        
+        noteSuccession = Succession(*animationList)
+        
+        return noteSuccession
             
     # creates new line where dot1 is the endpoint (it is presumably getting changed in most cases)
     def getUpdatedLine(self, dot1, dot2):
@@ -126,12 +166,13 @@ class AnimationGenerator(Scene):
         
         return updatedLine
         
-    # iterates through notes and counts up the frequency
+    # iterates through notes and finds the longest frequency (highest is the time for a full animation)
     def getTimeForFullAnimation(self):
         fullAnimationTime = 0
         
         for note in self.notes:
-            fullAnimationTime += note.frequency
+            if note.frequency > fullAnimationTime:
+                fullAnimationTime = note.frequency
             
         return fullAnimationTime
     
