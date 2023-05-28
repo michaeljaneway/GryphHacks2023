@@ -116,6 +116,7 @@ class MainApplication(tk.Tk):
         # Variables
 
         self.projectFrame_vars: Dict[str, tk.StringVar] = {
+
             "sample_rate": tk.StringVar(),
             "runtime": tk.StringVar()
         }
@@ -263,19 +264,19 @@ class MainApplication(tk.Tk):
 
         # Spinbox for note # and octave
         key_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["key_value"], warp = True)
+            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["key_value"], wrap= True)
 
         # Velocity Spinbox
         velocity_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["velocity_value"], warp = True)
+            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["velocity_value"], wrap = True)
 
         # Duration of Note Spinbox
         duration_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["duration_value"], increment=0.1, warp = True)
+            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["duration_value"], increment=0.1, wrap = True)
 
         # Frequency of Note Spinbox
         frequency_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["frequency_value"], increment=0.1, warp = True)
+            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["frequency_value"], increment=0.1, wrap = True)
 
         # ==========================================================
         # Grid Note Widgets
@@ -561,7 +562,7 @@ class MainApplication(tk.Tk):
     def load_effect_vals(self):
         project_name = self.getValueTypeOfSelection("project")["name"]
         instrument_name = self.getValueTypeOfSelection("instrument")["name"]
-        effect_name = self.getValueTypeOfSelection("note")["name"]
+        effect_name = self.getValueTypeOfSelection("effect")["name"]
 
         project_class = self.projects[project_name]
         instrument_class = project_class.getInstrument(instrument_name)
@@ -577,11 +578,12 @@ class MainApplication(tk.Tk):
         project_name = self.getValueTypeOfSelection("project")["name"]
 
         project_class = self.projects[project_name]
-
-        project_class.setSampleRate(
-            int(self.projectFrame_vars["sample_rate"].get()))
-        project_class.setRuntime(
-            float(self.projectFrame_vars["runtime"].get()))
+        
+        sample_rate = self.projectFrame_vars["sample_rate"].get() if str.isdigit(self.projectFrame_vars["sample_rate"].get()) else 0
+        run_time = self.projectFrame_vars["runtime"].get() if str.isdecimal(self.projectFrame_vars["sample_rate"].get()) else 0.0
+        
+        project_class.setSampleRate(int(sample_rate))
+        project_class.setRuntime(float(run_time))
 
     def update_instrument_vals(self):
         project_name = self.getValueTypeOfSelection("project")["name"]
@@ -589,9 +591,8 @@ class MainApplication(tk.Tk):
 
         project_class = self.projects[project_name]
         instrument_class = project_class.getInstrument(instrument_name)
-
-        instrument_class.setInstrumentPath(
-            self.instrumentFrame_vars["instrument_path"].get())
+        
+        instrument_class.setInstrumentPath(self.instrumentFrame_vars["instrument_path"].get())
 
     def update_note_vals(self):
         project_name = self.getValueTypeOfSelection("project")["name"]
@@ -601,14 +602,16 @@ class MainApplication(tk.Tk):
         project_class = self.projects[project_name]
         instrument_class = project_class.getInstrument(instrument_name)
         note_class = instrument_class.getNote(note_name)
-
-        note_class.setKey(int(self.noteFrame_vars["key_value"].get()))
-        note_class.setDuration(
-            float(self.noteFrame_vars["duration_value"].get()))
-        note_class.setVelocity(
-            int(self.noteFrame_vars["velocity_value"].get()))
-        note_class.setFrequency(
-            float(self.noteFrame_vars["frequency_value"].get()))
+        # Gets note values from spin
+        key = self.noteFrame_vars["key_value"].get() if str.isdigit(self.noteFrame_vars["key_value"].get()) else 0
+        duration = self.noteFrame_vars["duration_value"].get() if str.isdecimal(self.noteFrame_vars["duration_value"].get()) else 0.0
+        velocity = self.noteFrame_vars["velocity_value"].get() if str.isdigit(self.noteFrame_vars["velocity_value"].get()) else 0
+        frequency = self.noteFrame_vars["frequency_value"].get() if str.isdecimal(self.noteFrame_vars["frequency_value"].get()) else 0.0
+        
+        note_class.setKey(int(key))
+        note_class.setDuration(float(duration))
+        note_class.setVelocity(int(velocity))
+        note_class.setFrequency(float(frequency))
 
     def update_effect_vals(self):
         project_name = self.getValueTypeOfSelection("project")["name"]

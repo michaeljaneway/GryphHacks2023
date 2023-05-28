@@ -28,6 +28,7 @@ class SoundGenerator:
             for note_key in project.instruments[instrument_key].notes:
                 key_time: float = 0
                 while (key_time < project.runtime):
+                    
                     # (MIDI note, velocity, start, duration)
                     daw_instrument.add_midi_note(project.instruments[instrument_key].notes[note_key].key,
                                                  project.instruments[instrument_key].notes[note_key].velocity,

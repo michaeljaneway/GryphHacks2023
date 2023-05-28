@@ -12,36 +12,19 @@ config.background_color = BLACK
 
 class Test(ThreeDScene):
     def construct(self):
-        
         self.renderer.background_color = BLACK
+
+        freq1 = 2
+        freq2 = 3
         
-        ceil_len = 3
-        w11 = 6
-        w21 = w11 * 1.1  # w2 > w1
-        w12 = 10
-        w22 = w12 * 1.5  # w2 > w1
-        
-        p1 = 0
-        p2 = 0
-        L = 3
-        T1 = 16 * PI / (w11 + w21)
-        T2 = 16 * PI / (w12 + w22)
-        
+        L1 = 3
+
         # Setup
         a = Circle(radius=0.2, fill_opacity=1)
-        b = Circle(radius=0.2, fill_opacity=1).shift(UP*0.2)
-        l1 = Line(a.get_center() + UP * L, a.get_center()).set_color(WHITE)
-        l2 = Line(b.get_center() + UP * L, b.get_center()).set_color(WHITE)
+        b = Circle(radius=0.2, fill_opacity=1)
         
-        ceil = VGroup(
-            DashedLine(
-                start=ceil_len * LEFT,
-                end=(ceil_len) * RIGHT,
-                dashed_ratio=0.4,
-                dash_length=0.2,
-                color=BLACK,
-            ).shift(l1.get_start()[1] * UP)
-        )
+        l1 = Line(UP * L1, a.get_center()).set_color(WHITE)
+        l2 = Line(UP * L1, b.get_center()).set_color(WHITE)
 
         paint1 = Dot(fill_opacity=0).move_to(a.shift(ORIGIN))
         paint2 = Dot(fill_opacity=0).move_to(b.shift(ORIGIN))
@@ -49,24 +32,19 @@ class Test(ThreeDScene):
         # Physics
         t = ValueTracker()
         A1 = ValueTracker(0.4)
-        A2 = ValueTracker(0)
-        
+
         l1.add_updater(
             lambda m: m.set_angle(
-                A1.get_value() * np.cos(w11 * t.get_value() + p1)
-                + A2.get_value() * np.cos(w21 * t.get_value() + p2)
-                - PI / 2
+                A1.get_value() * np.cos(freq1 * t.get_value()) - PI / 2
             )
         )
-        
+
         l2.add_updater(
             lambda m: m.set_angle(
-                A1.get_value() * np.cos(w12 * t.get_value() + p1)
-                - A2.get_value() * np.cos(w22 * t.get_value() + p2)
-                - PI / 2
+                A1.get_value() * np.cos(freq2 * t.get_value()) - PI / 2
             )
         )
-        
+
         a.add_updater(lambda m: m.move_to(l1.get_end()))
         b.add_updater(lambda m: m.move_to(l2.get_end()))
 
@@ -75,8 +53,8 @@ class Test(ThreeDScene):
         trails = VGroup()
 
         def add_trail():
-            self.play(FadeIn(paint1), FadeIn(paint2), run_time = 0.4)
-            
+            self.play(FadeIn(paint1), FadeIn(paint2), run_time=0.4)
+
             trails.add(
                 VGroup(
                     VMobject()
@@ -89,7 +67,7 @@ class Test(ThreeDScene):
                     .set_sheen_direction(UP),
                 )
             )
-            
+
             trails[-1][0].add_updater(
                 lambda m, dt: m.shift(DOWN * 0.25 * dt).add_points_as_corners(
                     [paint1.get_center()]
@@ -101,11 +79,7 @@ class Test(ThreeDScene):
                 )
             )
 
-        config = {"stroke_color": SLATE,
-                  "stroke_width": 2, "stroke_opacity": 0.2}
-        
-
-        self.add(trails, l1, l2, ceil, a, b)
+        self.add(trails, l1, l2, a, b)
 
         def simulate(time):
             self.play(
@@ -117,10 +91,9 @@ class Test(ThreeDScene):
             )
 
         add_trail()
-        simulate(5 * T2)
+        simulate(10)
 
 
 if __name__ == "__main__":
     scene = Test()
-    # scene.add_sound("eggs.wav")
     scene.render()
