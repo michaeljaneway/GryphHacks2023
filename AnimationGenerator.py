@@ -60,7 +60,7 @@ class AnimationGenerator(Scene):
     
         # sort these notes by their keys (higher notes are supposed to me closer in and lower notes are supposed to be further out)
         # thus lower notes should be earlier in the array as they should be on the outside
-        notes.sort(key=self.sortByNoteKey)
+        notes.sort(key=self.sortByNoteKey, reverse=True)
         
         for i in range(len(self.notes)):
             # every other element goes on left or right side (sorted )
@@ -179,10 +179,12 @@ if __name__ == "__main__":
     notes = []
     
     # note that this is going in reverse order (order of frequency doesn't matter)
-    for i in range(6, 0, -1):
+    for i in range(6):
         # frequency right now is half of the note
         # key (to change later) and frequency are the most relevant
-        noteToAdd = Note("", 10 - i, i + 2, 0, 0)
+        
+        noteToAdd = Note("", i + 1, 7 - i, 0, 0) # FIXME watch when going to zero
+        # frequency, key is printed
         notes.append(noteToAdd)
     
     scene = AnimationGenerator()
