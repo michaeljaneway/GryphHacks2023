@@ -108,12 +108,23 @@ class AnimationGenerator(Scene):
         self.directionsThird = [] # goes toward center from the right
         self.directionsFourth = [] # goes toward the left from the center
         
+        i = 0
+        
         # assigning the directions to be going to the center (negative x direction)
-        for dot in self.endPoints:
-            self.directionsFirst.append([-dot.get_center()[0], -dot.get_center()[1], 0])
-            self.directionsSecond.append([-dot.get_center()[0], dot.get_center()[1], 0])
-            self.directionsThird.append([dot.get_center()[0], -dot.get_center()[1], 0])
-            self.directionsFourth.append([dot.get_center()[0], dot.get_center()[1], 0])
+        for i in range(len(self.endPoints)):
+            self.directionsFirst.append([-self.endPoints[i].get_center()[0], -self.endPoints[i].get_center()[1], 0])
+            self.directionsSecond.append([-self.endPoints[i].get_center()[0], self.endPoints[i].get_center()[1], 0])
+            self.directionsThird.append([self.endPoints[i].get_center()[0], -self.endPoints[i].get_center()[1], 0])
+            self.directionsFourth.append([self.endPoints[i].get_center()[0], self.endPoints[i].get_center()[1], 0])
+            
+            # adjusting to make endpoints go lower
+            self.directionsFirst[i] += DOWN * i/self.numNotes
+            self.directionsThird[i] += DOWN * i/self.numNotes
+            
+            self.directionsSecond[i] += UP * i/self.numNotes
+            self.directionsFourth[i] += UP * i/self.numNotes
+            
+            i += 1
             
         animations = []
         
