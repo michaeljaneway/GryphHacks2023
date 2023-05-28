@@ -14,3 +14,5 @@ media/
 # Built Visual Studio Code Extensions
 *.vsix
 
+*.wav
+__py_cache__/*
