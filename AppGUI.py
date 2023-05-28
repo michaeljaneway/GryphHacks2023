@@ -11,6 +11,8 @@ from ProjectStructs import *
 
 from AnimRenderScene import AnimRenderScene
 
+from AnimationGenerator import AnimationGenerator
+
 # converts a number in the spinbox to it's respective note
 
 
@@ -90,7 +92,7 @@ class MainApplication(tk.Tk):
 
         # Render Button
         self.render_button = ttk.Button(
-            self.left_menu_frame, text="Render Audio", command=lambda: self.render())
+            self.left_menu_frame, text="Render", command=lambda: self.render())
         self.render_button.grid(column=1, row=5, sticky=(
             tk.E, tk.W), padx=10, pady=(50, 10))
 
@@ -459,7 +461,8 @@ class MainApplication(tk.Tk):
 
         SoundGenerator.generate_project(self.projects[project_str], "eggs2.wav")
         
-        scene = AnimRenderScene()
+        # loading up other class to create a audio-visualizer
+        scene = AnimationGenerator()
         scene.load_project(self.projects[project_str])
         scene.render()
         
