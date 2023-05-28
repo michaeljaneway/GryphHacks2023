@@ -14,8 +14,7 @@ class AnimationGenerator(Scene):
     def construct(self):
         self.initStartingGraphics()
         self.initNotes()
-        # playing for 47 seconds for testing purposes
-        self.startPlaying(47)
+        scene.startPlaying(27)
     
     # all graphics that are not notes
     def initStartingGraphics(self):  
@@ -25,17 +24,22 @@ class AnimationGenerator(Scene):
         self.anchorPoints.add(anchorP1, anchorP2)
         
         self.anchorLine = Line(self.anchorPoints[0], self.anchorPoints[1])
-        self.anchorLine.color = RED
+        self.anchorLine.color = GREY
                 
-        self.topCircle = Circle().surround(anchorP1, buffer_factor=NOTE_WIDTH_MULTIPLIER * 2)
-        self.topCircle.set_stroke(color=PINK)
+        # actually added in after notes
+        self.topCircle = Circle(color=BLUE_A, fill_opacity=1).surround(anchorP1, buffer_factor=NOTE_WIDTH_MULTIPLIER * 2)
         
         self.add(self.anchorLine)
-        self.add(self.topCircle)
         
     def addNotes(self, notes):
         self.notes = notes
         self.numNotes = len(self.notes)
+    
+# Changes to be made with note sides
+# will change random frequency in test to something we know ahead of time
+# will iterate through notes, first will sort by frequency then will put largest on one side, second largest on next side
+# and so on
+# will have to save position of notes somewhere
     
     def initNotes(self):
         self.noteLines = []
@@ -48,26 +52,34 @@ class AnimationGenerator(Scene):
         self.endRight = self.numNotes
         notesOnLeft = self.endLeft - self.startLeft
         notesOnRight = self.endRight - self.startRight
+        curNotesOnLeft = 0
+        curNotesOnRight = 0
                 
         # iterates through each note that will be put on the left
         notesOnSide = 0
+    
+        # sort these notes by their keys (higher notes are supposed to me closer in and lower notes are supposed to be further out)
+        # thus lower notes should be earlier in the array as they should be on the outside
+        notes.sort(key=self.sortByNoteKey)
         
-        for i in range(self.startLeft, self.endLeft):
-            self.createNote(self.notes[i], notesOnSide/notesOnLeft * NOTE_DISTANCE_MULTIPLIER + 1, LEFT)
-            notesOnSide += 1
+        for i in range(len(self.notes)):
+            # every other element goes on left or right side (sorted )
+            if i % 2 == 0:
+                self.createNote(self.notes[i], curNotesOnLeft/notesOnLeft * NOTE_DISTANCE_MULTIPLIER + 1, LEFT)
+                
+                curNotesOnLeft += 1
+            else:
+                self.createNote(self.notes[i], curNotesOnRight/notesOnRight * NOTE_DISTANCE_MULTIPLIER + 1, RIGHT)
+                
+                curNotesOnRight += 1
             
-        # puts rest of notes on the right
-        notesOnSide = 0
-        
-        for i in range(self.startRight, self.endRight):
-            self.createNote(self.notes[i], notesOnSide/notesOnRight * NOTE_DISTANCE_MULTIPLIER + 1, RIGHT)
-            notesOnSide += 1
+        self.add(self.topCircle)
             
     # creates a new note line and note end point (p1)
     def createNote(self, note, length, side):
         # adding note lines
         notePoints = VGroup()
-        noteP1 = Dot(point=UP * 3 + self.calcuateHorizontalDirection(side, length), radius=POINT_SIZE)
+        noteP1 = Dot(point=UP * 2 + self.calcuateHorizontalDirection(side, length), radius=POINT_SIZE)
         noteP2 = Dot(point=UP * 3, radius=POINT_SIZE)
         
         notePoints.add(noteP1, noteP2)
@@ -80,6 +92,10 @@ class AnimationGenerator(Scene):
         self.endPoints.append(noteP1)
         
         self.add(noteLine)
+        
+    # comparison function to sort by a note key
+    def sortByNoteKey(self, e):
+        return e.key
         
     # calculates horizontal direction
     def calcuateHorizontalDirection(self, side, length):
@@ -114,24 +130,22 @@ class AnimationGenerator(Scene):
         animationDuration = self.notes[i].frequency
         halfAnimationDuration = animationDuration / 2
         animationsAdded = 0
-        movingToRight = True
-        
         animationList = []
         
         while animationDuration <= timeLeft:
             # initial view
             # move to right (if endpoint was initially on left), opposite otherwise
             if animationsAdded == 0:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency, rate_func=rate_functions.linear),)       
             # move to right (if endpoint was initially on left), opposite otherwise
             elif animationsAdded % 2 == 1:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=halfAnimationDuration))
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=halfAnimationDuration))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
             # move to left (if endpoint was initially on left), opposite otherwise
             else:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=halfAnimationDuration))
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=halfAnimationDuration))
-                
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
+     
             animationsAdded += 1
             timeLeft -= animationDuration
             
@@ -153,10 +167,11 @@ if __name__ == "__main__":
     # creating notes to test
     notes = []
     
-    for i in range(7):
+    # note that this is going in reverse order (order of frequency doesn't matter)
+    for i in range(6, 0, -1):
         # frequency right now is half of the note
         # key (to change later) and frequency are the most relevant
-        noteToAdd = Note("", randint(0, 127), i + 1, 0, 0)
+        noteToAdd = Note("", 10 - i, i + 2, 0, 0)
         notes.append(noteToAdd)
     
     scene = AnimationGenerator()
