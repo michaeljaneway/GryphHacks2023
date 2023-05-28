@@ -139,7 +139,8 @@ class AnimationGenerator(Scene):
     # creates code for a succession based on time left and full rotations calculated and returns it to be executed
     def createAnimationsSuccession(self, i, duration): 
         timeLeft = duration
-        animationDuration = self.notes[i].frequency
+        animationDuration = 1 / self.notes[i].frequency # converting from hertz to every x second this occurs
+        
         halfAnimationDuration = animationDuration / 2
         animationsAdded = 0
         animationList = []
@@ -148,18 +149,22 @@ class AnimationGenerator(Scene):
             # initial view
             # move to right (if endpoint was initially on left), opposite otherwise
             if animationsAdded == 0:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency, rate_func=rate_functions.linear),)       
+                # note that frequency is actually just the inverse of what frequency actually (see above conversion)
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=0, rate_func=rate_functions.linear))       
             # move to right (if endpoint was initially on left), opposite otherwise
             elif animationsAdded % 2 == 1:
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
+                
+                timeLeft -= animationDuration
             # move to left (if endpoint was initially on left), opposite otherwise
             else:
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
+
+                timeLeft -= animationDuration
      
             animationsAdded += 1
-            timeLeft -= animationDuration
             
         noteSuccession = Succession(*animationList)
         
