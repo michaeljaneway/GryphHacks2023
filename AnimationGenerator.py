@@ -7,7 +7,8 @@ from random import randint
 POINT_SIZE = 0.2
 NOTE_WIDTH = 5
 NOTE_WIDTH_MULTIPLIER = 1
-NOTE_CIRCLE_OFFSET = 2
+NOTE_CIRCLE_OFFSET = 1
+NOTE_DISTANCE_MULTIPLIER = 4
 
 class AnimationGenerator(Scene):
     def construct(self):
@@ -45,19 +46,21 @@ class AnimationGenerator(Scene):
         self.endLeft = int(self.numNotes/2)
         self.startRight = self.endLeft
         self.endRight = self.numNotes
+        notesOnLeft = self.endLeft - self.startLeft
+        notesOnRight = self.endRight - self.startRight
                 
         # iterates through each note that will be put on the left
         notesOnSide = 0
         
         for i in range(self.startLeft, self.endLeft):
-            self.createNote(self.notes[i], notesOnSide + 1, LEFT)
+            self.createNote(self.notes[i], notesOnSide/notesOnLeft * NOTE_DISTANCE_MULTIPLIER + 1, LEFT)
             notesOnSide += 1
             
         # puts rest of notes on the right
         notesOnSide = 0
         
         for i in range(self.startRight, self.endRight):
-            self.createNote(self.notes[i], notesOnSide + 1, RIGHT)
+            self.createNote(self.notes[i], notesOnSide/notesOnRight * NOTE_DISTANCE_MULTIPLIER + 1, RIGHT)
             notesOnSide += 1
             
     # creates a new note line and note end point (p1)
@@ -134,42 +137,6 @@ class AnimationGenerator(Scene):
             
         noteSuccession = Succession(*animationList)
         
-        # # just for first animation
-        # if fullAnimations > 0:
-        #     animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency))
-        #     movingToRight = False
-        #     fullAnimationsCount += 1
-            
-        # dividedFrequency = run_time=self.notes[i].frequency / 2
-            
-        # # now for rest of animations
-        # while fullAnimationsCount < fullAnimations:
-        #     if fullAnimationsCount % 2 == 1:
-        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=dividedFrequency))
-        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=dividedFrequency))
-        #         movingToRight = False
-        #     else:
-        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=dividedFrequency))
-        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=dividedFrequency))
-        #         movingToRight = True
-                
-        #     fullAnimationsCount += 1
-            
-        # # checking if partial rotations should be included based on time left in last animation cycle
-        # if self.timeLeft > self.notes[i].frequency:
-        #     if movingToRight:
-        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=dividedFrequency))
-        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=dividedFrequency))
-        #         movingToRight = False
-        #     else:
-        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=dividedFrequency))
-        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=dividedFrequency))
-        #         movingToRight = True
-                
-        #     self.timeLeft -= self.notes[i].frequency
-        
-        # noteSuccession = Succession(*animationList)
-        
         return noteSuccession
             
     # creates new line where dot1 is the endpoint (it is presumably getting changed in most cases)
@@ -186,7 +153,7 @@ if __name__ == "__main__":
     # creating notes to test
     notes = []
     
-    for i in range(6):
+    for i in range(7):
         # frequency right now is half of the note
         # key (to change later) and frequency are the most relevant
         noteToAdd = Note("", randint(0, 127), i + 1, 0, 0)
