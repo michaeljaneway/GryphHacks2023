@@ -477,7 +477,7 @@ class MainApplication(tk.Tk):
         scene = AnimationGenerator()
         scene.load_project(self.projects[project_str])
         scene.add_sound("eggs2.wav")
-        scene.render()
+        scene.render(preview=True)
 
         messagebox.showinfo(title="Isaiah Render Complete",
                             message="The render has been completed")
@@ -493,7 +493,7 @@ class MainApplication(tk.Tk):
         # loading up other class to create a audio-visualizer
         scene = AnimRenderScene()
         scene.load_project(self.projects[project_str], "eggs2.wav")
-        scene.render()
+        scene.render(preview=True)
 
         messagebox.showinfo(title="Michael Render Complete",
                             message="The render has been completed")
