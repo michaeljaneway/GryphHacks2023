@@ -26,15 +26,14 @@ class AnimationGenerator(Scene):
 
         for dot in dots:
             directions.append([-dot.get_center()[0], 0, 0])
-            dot.set_color(utils.color.random_color())
-            
+        
         animations = []
         
         i = 1
         
         for dot, direction in zip(dots, directions):
             animations.append(ApplyMethod(dot.shift, direction, run_time=i))
-            i+= 0.1
+            i += 0.1
 
         
         self.play(*animations)
