@@ -19,20 +19,37 @@ class AnimRenderScene(ThreeDScene):
     def construct(self):
         self.renderer.background_color = BLACK
 
-        Time = ValueTracker()
+        self.Time = ValueTracker()
 
-        mobject_list = []
+        # i = instrument, j = note
+        self.note_values: List[List[Dict[str, float]]] = []
 
-        instrument_dict: Dict[str, Instrument] = self.project.getInstruments()
+        self.instrument_dict: Dict[str,
+                                   Instrument] = self.project.getInstruments()
 
-        for instrument_key in instrument_dict:
+        self.generate_vals()
+        self.add_notes()
+
+        def simulate(sim_time):
+            self.play(
+                self.Time.animate.increment_value(sim_time),
+                rate_func=linear,
+                run_time=sim_time,
+            )
+
+        simulate(self.project.getRuntime())
+
+    def generate_vals(self):
+        for i, instrument_key in enumerate(self.instrument_dict):
             note_dict: Dict[str,
-                            Note] = instrument_dict[instrument_key].getNotes()
+                            Note] = self.instrument_dict[instrument_key].getNotes()
 
-            for note_key in note_dict:
+            self.note_values.append([])
+
+            for j, note_key in enumerate(note_dict):
                 note = note_dict[note_key]
 
-                note_VGroup = VGroup()
+                self.note_values[i].append([])
 
                 note_freq = note.getFrequency()
                 note_len = 1 + (note.getKey() / 127) * 4
@@ -41,44 +58,31 @@ class AnimRenderScene(ThreeDScene):
                 # W value
                 ang_freq = np.sqrt(note_grav/note_len)
 
-                note_VGroup.add(Circle(radius=0.2, fill_opacity=1))
+                self.note_values[i][j] = {
+                    "freq": note_freq,
+                    "len": note_len,
+                    "grav": note_grav,
+                    "ang_freq": ang_freq,
+                }
 
-                note_VGroup.add(Line(UP * note_len, note_VGroup[0].get_center()).set_color(WHITE))
+    def add_notes(self):
+        for i, instrument_key in enumerate(self.instrument_dict):
+            note_dict: Dict[str,
+                            Note] = self.instrument_dict[instrument_key].getNotes()
 
-                note_VGroup.add(Dot(fill_opacity=0).move_to(note_VGroup[0].shift(ORIGIN)))
+            for j, note_key in enumerate(note_dict):
+                vals = self.note_values[i][j]
 
-                note_VGroup[1].add_updater(
-                    lambda m: m.set_angle(
-                        np.cos(ang_freq * Time.get_value()) - PI / 2
-                    )
-                )
+                note_circle = Circle(radius=0.2, fill_opacity=1)
+                note_line = Line(start= UP * vals["len"], end=note_circle.get_center()).set_color(WHITE)
+                
+                note_circle.add(note_line)
 
-                note_VGroup[0].add_updater(
-                    lambda m: m.move_to(note_VGroup[1].get_end()))
+                note_line.add_updater(lambda m: m.set_angle(
+                    np.cos(vals["ang_freq"] * self.Time.get_value()) - PI / 2
+                ))
 
-                self.play(FadeIn(note_VGroup[2]), run_time=0.0)
+                note_circle.add_updater(
+                    lambda m: m.move_to(note_line.get_end()))
 
-                note_VGroup[2].add_updater(
-                    lambda m: m.move_to(note_VGroup[0].get_center()))
-
-                note_VGroup.add(VMobject().start_new_path(note_VGroup[2].get_center()).set_stroke(
-                    color=[WHITE, BLACK]).set_sheen_direction(UP))
-
-                note_VGroup[3].add_updater(
-                    lambda m, dt: m.shift(DOWN * 0.25 * dt).add_points_as_corners(
-                        [note_VGroup[2].get_center()]
-                    )
-                )
-
-                mobject_list.append(note_VGroup)
-
-        self.add(*mobject_list)
-
-        def simulate(sim_time):
-            self.play(
-                Time.animate.increment_value(sim_time),
-                rate_func=linear,
-                run_time=sim_time,
-            )
-
-        simulate(self.project.getRuntime())
+                self.add(note_line, note_circle)

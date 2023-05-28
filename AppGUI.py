@@ -377,7 +377,7 @@ class MainApplication(tk.Tk):
 
         # Add new project to project dict
         self.projects.update({new_project_name: Project(new_project_name)})
-
+    # Creates an instrument under a project, With the values from 
     def add_instrument(self):
         # If nothing is selected, return
         if not self.isTreeNodeSelected():
