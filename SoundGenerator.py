@@ -35,7 +35,7 @@ class SoundGenerator:
                                                  key_time,
                                                  project.instruments[instrument_key].notes[note_key].duration)
 
-                    key_time += project.instruments[instrument_key].notes[note_key].frequency
+                    key_time += 1 / project.instruments[instrument_key].notes[note_key].frequency
 
             for effect_key in project.instruments[instrument_key].effects:
                 daw_effect = engine.make_plugin_processor(

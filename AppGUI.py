@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import ttk
 import sv_ttk
 from tkinter.filedialog import *
@@ -7,6 +8,8 @@ from typing import *
 from SoundGenerator import SoundGenerator
 
 from ProjectStructs import *
+
+from AnimRenderScene import AnimRenderScene
 
 # converts a number in the spinbox to it's respective note
 
@@ -260,7 +263,7 @@ class MainApplication(tk.Tk):
 
         # Frequency Label
         frequency_Label = ttk.Label(
-            self.noteFrame, text="Note Frequency")
+            self.noteFrame, text="Note Frequency (Hz)")
 
         # Spinbox for note # and octave
         key_Spinbox = ttk.Spinbox(
@@ -455,6 +458,13 @@ class MainApplication(tk.Tk):
         project_str = self.getValueTypeOfSelection("project")["name"]
 
         SoundGenerator.generate_project(self.projects[project_str], "eggs2.wav")
+        
+        scene = AnimRenderScene()
+        scene.load_project(self.projects[project_str])
+        scene.render()
+        
+        messagebox.showinfo(title="Render Complete", message="The render has been completed")
+
 
 # ==========================================================
 # Utility Functions
@@ -579,8 +589,12 @@ class MainApplication(tk.Tk):
 
         project_class = self.projects[project_name]
         
-        sample_rate = self.projectFrame_vars["sample_rate"].get() if str.isdigit(self.projectFrame_vars["sample_rate"].get()) else 0
-        run_time = self.projectFrame_vars["runtime"].get() if str.isdecimal(self.projectFrame_vars["sample_rate"].get()) else 0.0
+        for value_key in self.projectFrame_vars:
+            if self.projectFrame_vars[value_key].get() == "":
+                return
+        
+        sample_rate = self.projectFrame_vars["sample_rate"].get()
+        run_time = self.projectFrame_vars["runtime"].get()
         
         project_class.setSampleRate(int(sample_rate))
         project_class.setRuntime(float(run_time))
@@ -602,11 +616,16 @@ class MainApplication(tk.Tk):
         project_class = self.projects[project_name]
         instrument_class = project_class.getInstrument(instrument_name)
         note_class = instrument_class.getNote(note_name)
+        
         # Gets note values from spin
-        key = self.noteFrame_vars["key_value"].get() if str.isdigit(self.noteFrame_vars["key_value"].get()) else 0
-        duration = self.noteFrame_vars["duration_value"].get() if str.isdecimal(self.noteFrame_vars["duration_value"].get()) else 0.0
-        velocity = self.noteFrame_vars["velocity_value"].get() if str.isdigit(self.noteFrame_vars["velocity_value"].get()) else 0
-        frequency = self.noteFrame_vars["frequency_value"].get() if str.isdecimal(self.noteFrame_vars["frequency_value"].get()) else 0.0
+        for value_key in self.noteFrame_vars:
+            if self.noteFrame_vars[value_key].get() == "":
+                return
+        
+        key = self.noteFrame_vars["key_value"].get() 
+        duration = self.noteFrame_vars["duration_value"].get() 
+        velocity = self.noteFrame_vars["velocity_value"].get()
+        frequency = self.noteFrame_vars["frequency_value"].get()
         
         note_class.setKey(int(key))
         note_class.setDuration(float(duration))

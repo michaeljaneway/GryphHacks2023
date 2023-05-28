@@ -91,6 +91,12 @@ class Instrument:
     def getSave_state_path(self) -> str:
         return self.save_state_path
     
+    def getNotes(self) -> Dict[str, Note]:
+        return self.notes
+    
+    def getEffects(self) -> Dict[str, Effect]:
+        return self.effects
+    
     def setName(self, name: str) -> None:
         self.name = name
     
@@ -129,9 +135,13 @@ class Project:
     def getRuntime(self) -> float:
         return self.runtime
     
+    def getInstruments(self) -> Dict[str, Instrument]:
+        return self.instruments
+    
     def setSampleRate(self, sample_rate: int) -> None:
         self.sample_rate = sample_rate
     
     def setRuntime(self, runtime:float) -> None:
         self.runtime = runtime
+        
     
