@@ -263,19 +263,19 @@ class MainApplication(tk.Tk):
 
         # Spinbox for note # and octave
         key_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["key_value"])
+            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["key_value"], warp = True)
 
         # Velocity Spinbox
         velocity_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["velocity_value"])
+            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["velocity_value"], warp = True)
 
         # Duration of Note Spinbox
         duration_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["duration_value"], increment=0.1)
+            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["duration_value"], increment=0.1, warp = True)
 
         # Frequency of Note Spinbox
         frequency_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["frequency_value"], increment=0.1)
+            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["frequency_value"], increment=0.1, warp = True)
 
         # ==========================================================
         # Grid Note Widgets
