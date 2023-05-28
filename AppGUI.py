@@ -18,7 +18,6 @@ from AnimationGenerator import AnimationGenerator
 
 # converts a number in the spinbox to it's respective note
 
-
 def number_to_note(number: int) -> str:
     NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
     NOTES_IN_OCTAVE = len(NOTES)

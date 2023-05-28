@@ -3,8 +3,7 @@ from manim.opengl import *
 import numpy as np
 from ProjectStructs import *
 
-BLACK = "#343434"
-SLATE = "#a2a2a2"
+BLACK = "#050203"
 WHITE = "#ece6e2"
 
 W = config.frame_width
