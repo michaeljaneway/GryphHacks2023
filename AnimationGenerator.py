@@ -1,6 +1,5 @@
 from manim import *
-from ProjectStructs import Note
-from random import randint
+from ProjectStructs import *
 
 # This is the class that generates an animation based on file input (audio and JSON)
 
@@ -13,8 +12,9 @@ NOTE_DISTANCE_MULTIPLIER = 4
 class AnimationGenerator(Scene):
     def construct(self):
         self.initStartingGraphics()
-        self.initNotes()
-        scene.startPlaying(27)
+        self.loadNotes()
+        self.initNoteObjects()
+        self.startPlaying(self.project.getRuntime())
     
     # all graphics that are not notes
     def initStartingGraphics(self):  
@@ -35,32 +35,20 @@ class AnimationGenerator(Scene):
         self.notes = notes
         self.numNotes = len(self.notes)
     
-# Changes to be made with note sides
-# will change random frequency in test to something we know ahead of time
-# will iterate through notes, first will sort by frequency then will put largest on one side, second largest on next side
-# and so on
-# will have to save position of notes somewhere
-    
-    def initNotes(self):
+    # creats all the lines and dots for the note creater
+    def initNoteObjects(self):
         self.noteLines = []
         self.endPoints = []
         
-        # determining indices for which what goes on the left and what goes on the right
-        self.startLeft = 0
-        self.endLeft = int(self.numNotes/2)
-        self.startRight = self.endLeft
-        self.endRight = self.numNotes
-        notesOnLeft = self.endLeft - self.startLeft
-        notesOnRight = self.endRight - self.startRight
+        # for loop to count amount of notes on left and amount of notes on right
+        notesOnLeft, notesOnRight = self.countNotesOnSides()
+        
         curNotesOnLeft = 0
         curNotesOnRight = 0
-                
-        # iterates through each note that will be put on the left
-        notesOnSide = 0
     
         # sort these notes by their keys (higher notes are supposed to me closer in and lower notes are supposed to be further out)
         # thus lower notes should be earlier in the array as they should be on the outside
-        notes.sort(key=self.sortByNoteKey, reverse=True)
+        self.notes.sort(key=self.sortByNoteKey, reverse=True)
         
         for i in range(len(self.notes)):
             # every other element goes on left or right side (sorted )
@@ -74,6 +62,19 @@ class AnimationGenerator(Scene):
                 curNotesOnRight += 1
             
         self.add(self.topCircle)
+        
+    def countNotesOnSides(self):
+        notesOnLeft = 0
+        notesOnRight = 0
+        
+        # now every other element is added to the right side, first element is on the left
+        for i in range(len(self.notes)):
+            if i % 2 == 0:
+                notesOnLeft += 1
+            else:
+                notesOnRight += 1
+                
+        return notesOnLeft, notesOnRight
             
     # creates a new note line and note end point (p1)
     def createNote(self, note, length, side):
@@ -148,20 +149,15 @@ class AnimationGenerator(Scene):
             # initial view
             # move to right (if endpoint was initially on left), opposite otherwise
             if animationsAdded == 0:
-                # note that frequency is actually just the inverse of what frequency actually (see above conversion)
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=0, rate_func=rate_functions.linear))       
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency, rate_func=rate_functions.linear),)       
             # move to right (if endpoint was initially on left), opposite otherwise
             elif animationsAdded % 2 == 1:
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
-                
-                timeLeft -= animationDuration
             # move to left (if endpoint was initially on left), opposite otherwise
             else:
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
                 animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=halfAnimationDuration, rate_func=rate_functions.linear))
-
-                timeLeft -= animationDuration
      
             animationsAdded += 1
             
@@ -179,19 +175,27 @@ class AnimationGenerator(Scene):
         
         return updatedLine
     
-if __name__ == "__main__":
-    # creating notes to test
-    notes = []
-    
-    # note that this is going in reverse order (order of frequency doesn't matter)
-    for i in range(6):
-        # frequency right now is half of the note
-        # key (to change later) and frequency are the most relevant
+    """The Code Below is Called By The GUI To Render the Project"""
+    # loads project provided by GUI
+    def load_project(self, project: Project):
+        self.project = project
+
+    # loads notes from project provided
+    def loadNotes(self):
+        Time = ValueTracker()
+
+        notes = []
+        # mobject_list = []
+
+        instrument_dict: Dict[str, Instrument] = self.project.getInstruments()
+
+        for instrument_key in instrument_dict:
+            note_dict: Dict[str,
+                            Note] = instrument_dict[instrument_key].getNotes()
+
+            for note_key in note_dict:
+                note = note_dict[note_key] # key as in a dictionary, not the key of the actual note
+                
+                notes.append(note)
         
-        noteToAdd = Note("", i + 1, 7 - i, 0, 0) # FIXME watch when going to zero
-        # frequency, key is printed
-        notes.append(noteToAdd)
-    
-    scene = AnimationGenerator()
-    scene.addNotes(notes)
-    scene.render()
+        self.addNotes(notes)

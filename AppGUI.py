@@ -220,12 +220,12 @@ class MainApplication(tk.Tk):
 
     def setInstrumentPath(self):
         filename = fd.askopenfilename(title="Select Path", initialdir=os.path.dirname(
-            os.path.abspath(__file__)), filetypes=(('VST3 Plugin', '.dll .vst3')))
+            os.path.abspath(__file__)), filetypes=[('VST3 Plugin', '*.dll *.vst3')])
         self.instrumentFrame_vars['instrument_path'].set(filename)
 
     def setEffectPath(self):
         effectfilename = fd.askopenfilename(title="Select Path", initialdir=os.path.dirname(
-            os.path.abspath(__file__)), filetypes=(('VST3 Plugin', '.dll .vst3')))
+            os.path.abspath(__file__)), filetypes=[('VST3 Plugin', '*.dll *.vst3')])
         self.effectFrame_vars['effect_path'].set(effectfilename)
 
     def create_noteframe(self):
