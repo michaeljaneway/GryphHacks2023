@@ -97,62 +97,78 @@ class AnimationGenerator(Scene):
             self.directionsFourth.append([dot.get_center()[0], dot.get_center()[1], 0])
             
         animations = []
-        animationDuration = 0
-        fullAnimationTime = self.getTimeForFullAnimation() # corresponds to one full cycle of animation
-        fullAnimations = duration // fullAnimationTime
-        self.timeLeft = duration - fullAnimationTime * fullAnimations
         
         # for loop to run animations
         for i in range(len(self.endPoints)):
             # dynamically creating a succession of animations for each endpoint and appending them to animations array
-            animations.append(self.createAnimationsSuccession(i, fullAnimations))
-            
-            animationDuration += self.notes[i].frequency # FIXME, will need to adjust with new implementation
+            animations.append(self.createAnimationsSuccession(i, duration))
 
         self.play(*animations)
         
     # creates code for a succession based on time left and full rotations calculated and returns it to be executed
-    def createAnimationsSuccession(self, i, fullAnimations): 
-        fullAnimationsCount = 0
+    def createAnimationsSuccession(self, i, duration): 
+        timeLeft = duration
+        animationDuration = self.notes[i].frequency
+        halfAnimationDuration = animationDuration / 2
+        animationsAdded = 0
         movingToRight = True
         
         animationList = []
         
-        # just for first animation
-        if fullAnimations > 0:
-            animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency))
-            movingToRight = False
-            fullAnimationsCount += 1
-            
-        dividedFrequency = run_time=self.notes[i].frequency / 2
-            
-        # now for rest of animations
-        while fullAnimationsCount < fullAnimations:
-            if fullAnimationsCount % 2 == 1:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=dividedFrequency))
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=dividedFrequency))
-                movingToRight = False
+        while animationDuration <= timeLeft:
+            # initial view
+            # move to right (if endpoint was initially on left), opposite otherwise
+            if animationsAdded == 0:
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency))
+            # move to right (if endpoint was initially on left), opposite otherwise
+            elif animationsAdded % 2 == 1:
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=halfAnimationDuration))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=halfAnimationDuration))
+            # move to left (if endpoint was initially on left), opposite otherwise
             else:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=dividedFrequency))
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=dividedFrequency))
-                movingToRight = True
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=halfAnimationDuration))
+                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=halfAnimationDuration))
                 
-            fullAnimationsCount += 1
+            animationsAdded += 1
+            timeLeft -= animationDuration
             
-        # checking if partial rotations should be included based on time left in last animation cycle
-        if self.timeLeft > self.notes[i].frequency:
-            if movingToRight:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=dividedFrequency))
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=dividedFrequency))
-                movingToRight = False
-            else:
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=dividedFrequency))
-                animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=dividedFrequency))
-                movingToRight = True
-                
-            self.timeLeft -= self.notes[i].frequency
-        
         noteSuccession = Succession(*animationList)
+        
+        # # just for first animation
+        # if fullAnimations > 0:
+        #     animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=self.notes[i].frequency))
+        #     movingToRight = False
+        #     fullAnimationsCount += 1
+            
+        # dividedFrequency = run_time=self.notes[i].frequency / 2
+            
+        # # now for rest of animations
+        # while fullAnimationsCount < fullAnimations:
+        #     if fullAnimationsCount % 2 == 1:
+        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=dividedFrequency))
+        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=dividedFrequency))
+        #         movingToRight = False
+        #     else:
+        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=dividedFrequency))
+        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=dividedFrequency))
+        #         movingToRight = True
+                
+        #     fullAnimationsCount += 1
+            
+        # # checking if partial rotations should be included based on time left in last animation cycle
+        # if self.timeLeft > self.notes[i].frequency:
+        #     if movingToRight:
+        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsSecond[i], run_time=dividedFrequency))
+        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsThird[i], run_time=dividedFrequency))
+        #         movingToRight = False
+        #     else:
+        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFourth[i], run_time=dividedFrequency))
+        #         animationList.append(ApplyMethod(self.endPoints[i].shift, self.directionsFirst[i], run_time=dividedFrequency))
+        #         movingToRight = True
+                
+        #     self.timeLeft -= self.notes[i].frequency
+        
+        # noteSuccession = Succession(*animationList)
         
         return noteSuccession
             
@@ -165,16 +181,6 @@ class AnimationGenerator(Scene):
         updatedLine.color = YELLOW
         
         return updatedLine
-        
-    # iterates through notes and finds the longest frequency (highest is the time for a full animation)
-    def getTimeForFullAnimation(self):
-        fullAnimationTime = 0
-        
-        for note in self.notes:
-            if note.frequency > fullAnimationTime:
-                fullAnimationTime = note.frequency
-            
-        return fullAnimationTime
     
 if __name__ == "__main__":
     # creating notes to test
