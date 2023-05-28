@@ -1,9 +1,12 @@
 import tkinter as tk
+from tkinter import filedialog as fd
 from tkinter import messagebox
 from tkinter import ttk
 import sv_ttk
 from tkinter.filedialog import *
 from typing import *
+
+import os
 
 from SoundGenerator import SoundGenerator
 
@@ -127,7 +130,7 @@ class MainApplication(tk.Tk):
         }
 
         # Variable trace callbacks
-        
+
         for key in self.projectFrame_vars:
             self.projectFrame_vars[key].trace(
                 "w", lambda x, y, z: self.update_project_vals())
@@ -183,7 +186,7 @@ class MainApplication(tk.Tk):
         }
 
         # Variable trace callbacks
-        
+
         for key in self.instrumentFrame_vars:
             self.instrumentFrame_vars[key].trace(
                 "w", lambda x, y, z: self.update_instrument_vals())
@@ -200,13 +203,9 @@ class MainApplication(tk.Tk):
         instrument_path_entry = ttk.Entry(
             self.instrumentFrame, textvariable=self.instrumentFrame_vars["instrument_path"])
 
-        # Path File Exploerer Button
+        # Path File Explorer Button
         pathbutton = ttk.Button(
-            self.instrumentFrame, text="File Explorer", command=lambda: self.add_note())
-
-        # Instrument editor Button
-        editorbutton = ttk.Button(self.instrumentFrame, text="Open Editor", command=lambda: self.open_instrument_editor()
-                                  )
+            self.instrumentFrame, text="File Explorer", command=lambda: self.setInstrumentPath())
 
         # ==========================================================
         # Grid Instrument Widgets
@@ -218,8 +217,16 @@ class MainApplication(tk.Tk):
             tk.N, tk.E, tk.S, tk.W), padx=15, pady=15)
         pathbutton.grid(column=2, row=0, sticky=(
             tk.N, tk.E, tk.S, tk.W), padx=15, pady=15)
-        editorbutton.grid(column=1, row=2, sticky=(
-            tk.N, tk.E, tk.S, tk.W), padx=15, pady=15)
+
+    def setInstrumentPath(self):
+        filename = fd.askopenfilename(title="Select Path", initialdir=os.path.dirname(
+            os.path.abspath(__file__)), filetypes=(('VST3 Plugin', '.dll .vst3')))
+        self.instrumentFrame_vars['instrument_path'].set(filename)
+
+    def setEffectPath(self):
+        effectfilename = fd.askopenfilename(title="Select Path", initialdir=os.path.dirname(
+            os.path.abspath(__file__)), filetypes=(('VST3 Plugin', '.dll .vst3')))
+        self.effectFrame_vars['effect_path'].set(effectfilename)
 
     def create_noteframe(self):
         # ==========================================================
@@ -269,19 +276,19 @@ class MainApplication(tk.Tk):
 
         # Spinbox for note # and octave
         key_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["key_value"], wrap= True)
+            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["key_value"], wrap=True)
 
         # Velocity Spinbox
         velocity_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["velocity_value"], wrap = True)
+            self.noteFrame, from_=0.0, to=127.0, textvariable=self.noteFrame_vars["velocity_value"], wrap=True)
 
         # Duration of Note Spinbox
         duration_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["duration_value"], increment=0.1, wrap = True)
+            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["duration_value"], increment=0.1, wrap=True)
 
         # Frequency of Note Spinbox
         frequency_Spinbox = ttk.Spinbox(
-            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["frequency_value"], increment=0.1, wrap = True)
+            self.noteFrame, from_=0.0, to=10000.0, textvariable=self.noteFrame_vars["frequency_value"], increment=0.1, wrap=True)
 
         # ==========================================================
         # Grid Note Widgets
@@ -309,11 +316,15 @@ class MainApplication(tk.Tk):
 
     def create_effectframe(self):
         # ==========================================================
-        # Instrument Frame
+        # Effect Frame
         # ==========================================================
 
         self.effectFrame = ttk.LabelFrame(
             self, padding="20", width=150, height=200, text="Effect")
+
+        # Path File Explorer Button
+        pathbutton = ttk.Button(
+            self.effectFrame, text="File Explorer", command=lambda: self.setEffectPath())
 
         # ==========================================================
         # Instrument Variables
@@ -325,7 +336,7 @@ class MainApplication(tk.Tk):
         }
 
         # Variable trace callbacks
-        
+
         for key in self.effectFrame_vars:
             self.effectFrame_vars[key].trace(
                 "w", lambda x, y, z: self.update_effect_vals())
@@ -336,19 +347,15 @@ class MainApplication(tk.Tk):
 
         # Path Label
         pathlabel = ttk.Label(
-            self.effectFrame, text="effect path", justify="center")
+            self.effectFrame, text="Effect Path", justify="center")
 
         # Entry box for the Instrument Path
         effect_path_entry = ttk.Entry(
             self.effectFrame, textvariable=self.effectFrame_vars["effect_path"])
 
-        # Path File Exploerer Button
+        # Path File Explorer Button
         pathbutton = ttk.Button(
-            self.effectFrame, text="File Explorer", command=lambda: self.add_note())
-
-        # Instrument editor Button
-        editorbutton = ttk.Button(self.effectFrame, text="Open Editor", command=lambda: self.open_instrument_editor()
-                                  )
+            self.effectFrame, text="File Explorer", command=lambda:  self.setEffectPath())
 
         # ==========================================================
         # Grid Instrument Widgets
@@ -359,8 +366,6 @@ class MainApplication(tk.Tk):
         effect_path_entry.grid(column=1, row=0, sticky=(
             tk.N, tk.E, tk.S, tk.W), padx=15, pady=15)
         pathbutton.grid(column=2, row=0, sticky=(
-            tk.N, tk.E, tk.S, tk.W), padx=15, pady=15)
-        editorbutton.grid(column=1, row=2, sticky=(
             tk.N, tk.E, tk.S, tk.W), padx=15, pady=15)
 
 
@@ -377,7 +382,8 @@ class MainApplication(tk.Tk):
 
         # Add new project to project dict
         self.projects.update({new_project_name: Project(new_project_name)})
-    # Creates an instrument under a project, With the values from 
+    # Creates an instrument under a project, With the values from
+
     def add_instrument(self):
         # If nothing is selected, return
         if not self.isTreeNodeSelected():
@@ -459,15 +465,17 @@ class MainApplication(tk.Tk):
 
         project_str = self.getValueTypeOfSelection("project")["name"]
 
-        SoundGenerator.generate_project(self.projects[project_str], "eggs2.wav")
-        
+        SoundGenerator.generate_project(
+            self.projects[project_str], "eggs2.wav")
+
         # loading up other class to create a audio-visualizer
         scene = AnimationGenerator()
-        scene.load_project(self.projects[project_str])
+        scene.load_project(self.projects[project_str], "eggs2.wav")
         scene.add_sound("eggs2.wav")
         scene.render()
-        
-        messagebox.showinfo(title="Render Complete", message="The render has been completed")
+
+        messagebox.showinfo(title="Render Complete",
+                            message="The render has been completed")
 
 
 # ==========================================================
@@ -475,6 +483,8 @@ class MainApplication(tk.Tk):
 # ==========================================================
 
     # Checks what item is pressed in the selection tree and changes the middle frame accordingly
+
+
     def tree_select(self):
         if not self.isTreeNodeSelected():
             return
@@ -592,14 +602,14 @@ class MainApplication(tk.Tk):
         project_name = self.getValueTypeOfSelection("project")["name"]
 
         project_class = self.projects[project_name]
-        
+
         for value_key in self.projectFrame_vars:
             if self.projectFrame_vars[value_key].get() == "":
                 return
-        
+
         sample_rate = self.projectFrame_vars["sample_rate"].get()
         run_time = self.projectFrame_vars["runtime"].get()
-        
+
         project_class.setSampleRate(int(sample_rate))
         project_class.setRuntime(float(run_time))
 
@@ -609,8 +619,9 @@ class MainApplication(tk.Tk):
 
         project_class = self.projects[project_name]
         instrument_class = project_class.getInstrument(instrument_name)
-        
-        instrument_class.setInstrumentPath(self.instrumentFrame_vars["instrument_path"].get())
+
+        instrument_class.setInstrumentPath(
+            self.instrumentFrame_vars["instrument_path"].get())
 
     def update_note_vals(self):
         project_name = self.getValueTypeOfSelection("project")["name"]
@@ -620,17 +631,17 @@ class MainApplication(tk.Tk):
         project_class = self.projects[project_name]
         instrument_class = project_class.getInstrument(instrument_name)
         note_class = instrument_class.getNote(note_name)
-        
+
         # Gets note values from spin
         for value_key in self.noteFrame_vars:
             if self.noteFrame_vars[value_key].get() == "":
                 return
-        
-        key = self.noteFrame_vars["key_value"].get() 
-        duration = self.noteFrame_vars["duration_value"].get() 
+
+        key = self.noteFrame_vars["key_value"].get()
+        duration = self.noteFrame_vars["duration_value"].get()
         velocity = self.noteFrame_vars["velocity_value"].get()
         frequency = self.noteFrame_vars["frequency_value"].get()
-        
+
         note_class.setKey(int(key))
         note_class.setDuration(float(duration))
         note_class.setVelocity(int(velocity))
@@ -683,6 +694,3 @@ class MainApplication(tk.Tk):
         for key in self.effectFrame_vars:
             self.effectFrame_vars[key].trace(
                 "w", lambda x, y, z: self.update_effect_vals())
-
-    def open_instrument_editor(self):
-        pass
